@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="VulnScope · C/C++ 函数漏洞检测自主智能体工作台" />
+  <title>VulnScope | 函数漏洞检测智能体</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">V<span class="spark">✦</span></span><div><strong>VULNSCOPE</strong><small>SECURITY AGENT PLATFORM</small></div></div>
+      <div class="sidebar-label">WORKSPACE <span>01</span></div>
+      <nav class="side-nav" aria-label="工作台导航">
+        <button class="nav-button active" data-tab="single"><span class="nav-icon">⌘</span><span>函数检测</span><span class="nav-arrow">↗</span></button>
+        <button class="nav-button" data-tab="batch"><span class="nav-icon">▦</span><span>批量任务</span><span class="nav-arrow">↗</span></button>
+        <button class="nav-button" data-tab="scoring"><span class="nav-icon">▥</span><span>检测评分</span><span class="nav-arrow">↗</span></button>
+        <button class="nav-button" data-tab="knowledge"><span class="nav-icon">◇</span><span>领域知识库</span><span class="nav-arrow">↗</span></button>
+      </nav>
+      <div class="sidebar-label divider-label">OBSERVABILITY</div>
+      <div class="sidebar-note"><span class="live-dot"></span> Evidence-driven workflow <p>知识检索 → 自主推理 → 按需读仓库 → 输出结论</p></div>
+      <div class="sidebar-bottom">
+        <div class="security-card"><div class="security-icon">◎</div><strong>严格隔离运行</strong><p>仅加载目标样本允许的单版本仓库快照。禁止搜索网络与双版本对照。</p></div>
+        <div class="bottom-meta">ADVANCED SOFTWARE ENGINEERING<br />2026 · AUTUMN PROJECT</div>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div class="breadcrumb">课程项目 <span>/</span> <strong>智能体工作台</strong></div><div class="top-right"><span id="modelIndicator" class="pill pill-muted"><span class="tiny-dot"></span>读取配置…</span><button id="showModels" class="api-link" type="button" style="cursor:pointer">⚙ 模型设置</button><a href="/docs" class="api-link" target="_blank" rel="noopener noreferrer">API 文档 ↗</a></div></header>
+      <div class="main-inner">
+        <section class="hero"><div class="hero-copy"><div class="eyebrow"><span class="eyebrow-line"></span> AUTONOMOUS VULNERABILITY ANALYSIS</div><h1>函数漏洞检测<span class="accent">智能体</span><span class="title-period">.</span></h1><p>融合历史 CVE 案例检索与仓库上下文溯源，<br class="desktop-break" />让每一次安全判断都有据可查。</p><div class="hero-tags"><span>RAG · 知识增强</span><span>AGENT · 自主工具调用</span><span>TRACE · 全链路追踪</span></div></div><div class="hero-graphic" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="core-shape">⌁</div><span class="orbit-dot dot-one"></span><span class="orbit-dot dot-two"></span><span class="orb-label">ANALYZE // VERIFY</span></div></section>
+        <div class="metrics" aria-label="系统状态"><div class="metric"><div class="metric-label">HISTORICAL CASES <span>01</span></div><div class="metric-value" id="caseCount">—</div><div class="metric-foot">已入库漏洞 / 修复配对</div></div><div class="metric"><div class="metric-label">CWE CATEGORIES <span>02</span></div><div class="metric-value" id="cweCount">—</div><div class="metric-foot">数据集覆盖漏洞类别</div></div><div class="metric"><div class="metric-label">AGENT RUNTIME <span>03</span></div><div class="metric-value metric-value-small" id="runtimeText">检测中</div><div class="metric-foot" id="runtimeNote">正在检查框架安装情况</div></div></div>
+
+        <section id="modelSettings" class="panel wide-panel hidden" aria-label="阿里云百炼 DeepSeek 模型配置" style="margin-bottom:20px;padding:24px">
+          <h2>阿里云百炼 · DeepSeek 模型设置</h2><p class="small-muted">服务端阿里云百炼 API Key 从 .env 读取，页面不展示密钥。保存仅影响新提交的检测任务。</p>
+          <div class="field-row"><div class="field"><label for="modelSelect">选择模型</label><select id="modelSelect"><option value="deepseek-v4.1-flash-1017">DeepSeek V4.1 Flash（1017）</option><option value="deepseek-v4-pro">DeepSeek V4 Pro</option></select></div>
+          <div class="field"><label for="thinkingSelect">推理模式</label><select id="thinkingSelect"><option value="disabled">非思考模式</option><option value="enabled">思考模式</option></select></div><small class="muted">工具调用连通性测试固定使用非思考模式并强制调用工具；实际检测任务仍使用此处选定的推理模式。思考模式下工具选择使用 auto。</small></div>
+          <div class="field"><label for="stepsSelect">Agent 最大推理步数（2—20）</label><input id="stepsSelect" type="number" min="2" max="20" value="16" /></div>
+          <div class="field-row"><button class="primary-button" type="button" id="saveModels">保存模型配置</button><button class="primary-button" type="button" id="testModels">测试真实 API 工具调用</button></div>
+          <p id="modelInfo" class="form-hint" role="status"></p>
+        </section>
+
+        <section class="workspace-tab" id="tab-single">
+          <div class="section-heading"><div><div class="section-overline">MODULE 01 / SINGLE FUNCTION</div><h2>单函数智能检测</h2><p>提供待测函数，Agent 会根据分析需要自主调用知识与上下文工具。</p></div><span class="section-index">01 — 03</span></div>
+          <div class="work-grid"><form id="singleForm" class="panel input-panel"><div class="panel-heading"><div class="panel-title"><span class="panel-number">01</span><strong>检测配置</strong></div><span class="panel-caption">FUNCTION INPUT</span></div>
+            <div class="field-row"><div class="field"><label for="idx">样本索引 IDX</label><input id="idx" name="idx" value="manual-001" required maxlength="120" /></div><div class="field"><label for="target">仓库版本选择 <span class="helper-inline">必填*</span></label><select id="target"><option value="">不提供仓库（仅函数 + RAG）</option><option value="1">漏洞版快照：修复提交的父版本 (1)</option><option value="0">修复版快照：修复提交版本 (0)</option></select></div></div>
+            <div class="field"><label for="commitUrl">GitHub 修复提交链接 <span class="optional">可选，提供时须选对应版本</span></label><input id="commitUrl" type="url" placeholder="https://github.com/owner/repo/commit/40位SHA" autocomplete="off" /></div>
+            <div class="field code-field"><div class="field-label-row"><label for="func">C / C++ 函数代码</label><button type="button" class="text-link" id="fillExample">插入演示函数 ↗</button></div><div class="editor-wrap"><div class="editor-bar"><span class="editor-dots"><i></i><i></i><i></i></span><span>function.cpp</span><span class="editor-tag">C / C++</span></div><textarea id="func" spellcheck="false" required placeholder="// 在此粘贴待测函数源码\nint process(const char *src, size_t len) {\n    // ...\n}"></textarea></div><div class="editor-foot"><span>分析时不会同时提供测试对中的另一版本</span><span id="charCount">0 chars</span></div></div>
+            <button class="primary-button" type="submit" id="runSingle"><span>启动智能体检测</span><span>↗</span></button><p class="form-hint" id="formHint">需要支持 function calling 的 LLM；未配置密钥时无法获得真实预测。</p></form>
+            <div class="panel flow-panel"><div class="panel-heading"><div class="panel-title"><span class="panel-number">02</span><strong>智能分析流程</strong></div><span class="panel-caption">LIVE PIPELINE</span></div>
+              <div class="workflow"><div class="flow-step"><span class="step-mark">01</span><div><strong>历史案例检索</strong><p>从提供的数据集召回相似代码与漏洞描述</p></div><span class="step-indicator">RAG</span></div><div class="step-line"></div><div class="flow-step"><span class="step-mark">02</span><div><strong>自主推理决策</strong><p>综合当前代码与 RAG 证据，判断缺少的上下文</p></div><span class="step-indicator">LLM</span></div><div class="step-line"></div><div class="flow-step"><span class="step-mark">03</span><div><strong>按需仓库溯源</strong><p>主动寻找调用关系、宏定义、变量和辅助函数</p></div><span class="step-indicator">TOOLS</span></div><div class="step-line"></div><div class="flow-step"><span class="step-mark">04</span><div><strong>结构化检测报告</strong><p>漏洞判定、判定理由和完整证据轨迹</p></div><span class="step-indicator">REPORT</span></div></div>
+              <div class="runtime-box"><span class="live-dot"></span><div><strong>证据驱动，而非盲目扫描</strong><p>仅在 Agent 判断证据不足时调用仓库工具；所有操作均记入审计事件。</p></div></div>
+            </div></div>
+        </section>
+
+        <section class="workspace-tab hidden" id="tab-batch"><div class="section-heading"><div><div class="section-overline">MODULE 02 / BATCH ANALYSIS</div><h2>批量数据集检测</h2><p>每个 JSONL 样本均独立执行，严格隔离成对版本，完成后导出 result.jsonl。</p></div><span class="section-index">02 — 03</span></div><form id="batchForm" class="panel wide-panel"><div class="panel-heading"><div class="panel-title"><span class="panel-number">01</span><strong>批量任务</strong></div><span class="panel-caption">DATASET INPUT</span></div><div class="upload-split"><div class="upload-zone" id="batchDrop"><span class="upload-icon">⇧</span><strong>上传 test.jsonl 或 dataset.zip</strong><p>点击选择，或拖放文件至此处</p><span class="upload-format">idx / func / commit_url / target</span><input type="file" accept=".jsonl,.zip" id="batchFile" aria-label="待测 JSONL" /></div><div class="upload-help"><h3>批量检测规范</h3><p>每行一个 JSON 对象，其中 <code>func</code> 为函数源码；提供 <code>commit_url</code> 时必须指定 <code>target</code>（仅用于获取准确仓库版本，绝不交给 LLM）。</p><pre>{"idx": 101, "func": "int f(){...}",
+ "commit_url": "https://github.com/.../commit/...",
+ "target": 1}</pre><p class="small-muted">最多 500 条 · 严格按样本逐项隔离 · 不允许传入 git diff</p></div></div><div class="local-action-row"><button type="button" class="primary-button button-narrow" id="runLocalBatch">使用 dataset/test.jsonl 检测 ↗</button><button type="submit" class="secondary-button" id="runBatch">使用上传文件检测 ↗</button></div><p class="form-hint" id="localTestHint">默认读取项目 dataset/test.jsonl；检测完成后自动保存至 result/任务ID/。</p></form></section>
+
+        <section class="workspace-tab hidden" id="tab-knowledge"><div class="section-heading"><div><div class="section-overline">MODULE 03 / KNOWLEDGE BASE</div><h2>历史 CVE 领域知识库</h2><p>仅对课程提供的历史案例进行本地向量化，不接入外部安全知识或在线搜索。</p></div><span class="section-index">03 — 03</span></div><form id="knowledgeForm" class="panel wide-panel"><div class="panel-heading"><div class="panel-title"><span class="panel-number">01</span><strong>构建 RAG 索引</strong></div><span class="panel-caption">LOCAL KNOWLEDGE ONLY</span></div><div class="upload-split"><div class="upload-zone" id="knowledgeDrop"><span class="upload-icon">◇</span><strong>导入历史配对案例</strong><p>上传 knowledge.jsonl 或 dataset.zip</p><span class="upload-format">课程格式：target / func / func_hash / commit_id / cve / cwe[]</span><input type="file" accept=".jsonl,.zip" id="knowledgeFile" aria-label="历史 CVE JSONL" /></div><div class="upload-help"><h3>知识来源隔离</h3><p>允许使用漏洞版与修复版函数、CVE 描述、修复提交说明、CWE、项目与文件名。索引由用户上传数据直接构建。</p><pre>{"target": 1, "func": "int f(){...}",
+ "func_hash": "...", "commit_id": "...",
+ "cve": "CVE-...", "cwe": "['CWE-...']",
+ "commit_url": "..."}</pre><p class="small-muted">自动校验相邻配对、剔除元信息不一致样本和重复函数对；每次导入会重新构建完整索引；不会附加任何预置或网络知识。</p></div></div><div class="local-action-row"><button type="button" class="primary-button button-narrow" id="runLocalKnowledge">读取 dataset/knowledge.jsonl 构建 ↗</button><button type="submit" class="secondary-button" id="runKnowledge">使用上传文件构建 ↗</button><button type="button" class="secondary-button" id="clearKnowledge">清空当前 RAG 索引</button></div><p class="form-hint" id="localKnowledgeHint">默认读取项目根目录 dataset/knowledge.jsonl，严格检查漏洞/修复配对。</p></form><div class="knowledge-banner"><span>◎</span><div><strong>课程约束已内置</strong><p>不提供外部搜索工具；不会自动下载 CVE 数据；RAG 仅从上传的历史样本建立索引。</p></div></div></section>
+
+        <section class="workspace-tab hidden" id="tab-scoring">
+          <div class="section-heading"><div><div class="section-overline">MODULE 04 / COURSE EVALUATION</div><h2>检测结果评分</h2><p>检测结束后按课程相邻样本对计算 P-C / P-V / P-B / P-R；真实标签仅供评分端使用，不参与 Agent 推理。</p></div><span class="section-index">04 — 04</span></div>
+          <div class="panel wide-panel score-panel"><div class="panel-heading"><div class="panel-title"><span class="panel-number">01</span><strong>选择检测任务</strong></div><span class="panel-caption">POST-INFERENCE ONLY</span></div>
+            <div class="score-controls"><label for="scoreJob">历史批量任务</label><select id="scoreJob"><option value="">请选择已完成批量任务</option></select><button type="button" class="secondary-button" id="refreshJobs">刷新任务列表</button><button type="button" class="primary-button" id="runScore">计算 / 更新评分</button><button type="button" class="secondary-button" id="deleteScoreJob">删除所选任务</button></div>
+            <div class="local-action-row"><button type="button" class="secondary-button" id="clearAllResults">清空全部历史任务与结果日志</button><span class="form-hint">不会删除 dataset/、RAG 知识库或阿里云百炼模型设置；运行中的任务不可清空。</span></div><p class="form-hint" id="scoreHint">评测真值读取 dataset/test.jsonl，结果保存在 result/&lt;任务ID&gt;/score.json；仅对本地课程测试集的预测有效。</p>
+            <div id="scoreView" class="score-view"><div class="empty-state"><div class="empty-icon">▥</div><strong>等待评测</strong><p>批量任务完成后可查看成对统计和等级。</p></div></div>
+          </div>
+        </section>
+
+        <section id="resultsSection" class="results-area"><div class="section-heading results-header"><div><div class="section-overline">ANALYSIS / OBSERVABILITY</div><h2>检测过程与报告</h2><p>实时记录历史案例检索、推理动作和受限仓库读取证据。</p></div><div class="status-wrap"><span id="jobStatus" class="pill pill-muted"><span class="tiny-dot"></span>尚未运行</span></div></div>
+          <div class="results-grid"><div class="panel events-panel"><div class="panel-heading"><div class="panel-title"><span class="panel-number">03</span><strong>实时分析记录</strong></div><span class="panel-caption" id="eventCount">0 EVENTS</span></div><div id="eventFeed" class="event-feed"><div class="empty-state"><div class="empty-icon">⌁</div><strong>等待分析任务</strong><p>启动函数检测后，Agent 的检索和工具行为将实时出现在这里。</p></div></div></div>
+            <div class="panel report-panel"><div class="panel-heading"><div class="panel-title"><span class="panel-number">04</span><strong>检测报告</strong></div><span class="panel-caption">STRUCTURED OUTPUT</span></div><div id="reportArea" class="report-area"><div class="empty-state"><div class="empty-icon">▤</div><strong>尚无检测结论</strong><p>报告包含 idx、二分类结果、判定理由，以及知识检索与仓库读取的可追溯记录。</p></div></div><div id="reportActions" class="report-actions hidden"><button type="button" id="downloadResult" class="secondary-button">↓ 导出 result.jsonl</button><button type="button" id="downloadReports" class="secondary-button">↓ 完整报告 JSON</button></div></div></div></section>
+        <footer class="footer"><span>VULNSCOPE · EVIDENCE BEFORE ASSERTION</span><span>BUILT FOR C/C++ SECURITY RESEARCH · v3.4</span></footer>
+      </div>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/static/model-settings.js?v=3.4.0" defer></script>
+  <script src="/static/app.js?v=3.4.0" defer></script>
+</body>
+</html>

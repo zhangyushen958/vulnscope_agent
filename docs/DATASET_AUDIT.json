@@ -1,0 +1,31 @@
+{
+  "knowledge_rows": 7578,
+  "knowledge_candidate_pairs": 3789,
+  "valid_positional_pairs": 3772,
+  "excluded_inconsistent_pairs": 17,
+  "excluded_pair_start_line_numbers": [
+    4235,
+    4667,
+    4723,
+    4869,
+    5055,
+    5061,
+    5209,
+    5261,
+    5297,
+    5331,
+    5371,
+    5719,
+    6561,
+    6935,
+    7209,
+    7377,
+    7417
+  ],
+  "duplicate_content_pairs": 3,
+  "final_indexed_cases": 3769,
+  "test_rows": 300,
+  "test_pairs": 150,
+  "test_link_exceptions": 1,
+  "real_model_predictions_executed": false
+}
